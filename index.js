@@ -31,13 +31,15 @@ client.setMyCommands([
 ]);
 
 client.onText(/\/start/, (msg) => {
+    if (interval) return;
+
     interval = setInterval(async () => {
         await client.sendDice(msg.chat.id)
             .then((result) => {
                 dice_values.push(result.dice.value);
                 averages.push(average_calc(dice_values).toFixed(4));
             });
-    }, 1000);
+    }, 300);
 });
 
 client.onText(/\/result/, (msg) => {
@@ -50,6 +52,7 @@ client.onText(/\/graph/, (msg) => {
 
 client.onText(/\/stop/, (msg) => {
     clearInterval(interval);
+    interval = null;
 
     result(msg);
     chart_gen();
