@@ -24,3 +24,5 @@ fig.update_layout(
 )
 
 fig.write_image(f"./charts/{fileNameTime}-chart.png", width=900, height=600)
+
+print(f"{fileNameTime}-chart.png")
