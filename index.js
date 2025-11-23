@@ -5,12 +5,12 @@ const token = process.env.TOKEN;
 const client = new Client(token, {polling: true});
 
 let interval;
-const arr = [];
+const dice_values = [];
+const averages = [];
 
+const average_calc = (arr) => arr.reduce((acc, cur) => acc + cur) / arr.length;
 const result = (msg) => {
-    const average = arr.reduce((a, b) => a + b) / arr.length;
-
-    client.sendMessage(msg.chat.id, `\`\`\`Result\nDice Roll: ${arr.length}\nAvg: ${average.toFixed(4)}\`\`\``, {
+    client.sendMessage(msg.chat.id, `\`\`\`Result\nDice Roll: ${dice_values.length}\nAverage: ${average_calc(dice_values).toFixed(4)}\`\`\``, {
         parse_mode: 'Markdown',
     });
 }
@@ -25,7 +25,8 @@ client.onText(/\/start/, (msg) => {
     interval = setInterval(async () => {
         await client.sendDice(msg.chat.id)
             .then((result) => {
-                arr.push(result.dice.value);
+                dice_values.push(result.dice.value);
+                averages.push(average_calc(dice_values).toFixed(4));
             });
     }, 3000);
 });
