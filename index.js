@@ -1,5 +1,6 @@
 require('dotenv').config();
 const Client = require('node-telegram-bot-api');
+const path = require('path');
 const {spawn} = require('child_process');
 
 const token = process.env.TOKEN;
@@ -15,11 +16,16 @@ const result = (msg) => {
         parse_mode: 'Markdown',
     });
 }
-const chart_gen = () => {
+const chart_gen = (msg) => {
     const arr = averages.map(i => Number(i));
 
     const py = spawn('py', ['script.py', arr, arr.map((_, i) => i + 1)]);
-    py.stdout.on("data", data => console.log(data.toString()));
+    py.stdout.on("data", data => {
+        const chart = data.toString().trim();
+        const filePath = path.join(__dirname, '\\charts\\' + chart);
+
+        client.sendPhoto(msg.chat.id, filePath);
+    });
     py.stderr.on("data", err => console.error(err.toString()));
 }
 
@@ -55,6 +61,6 @@ client.onText(/\/stop/, (msg) => {
     interval = null;
 
     result(msg);
-    chart_gen();
+    chart_gen(msg);
     client.sendMessage(msg.chat.id, 'Stopped!');
 });
