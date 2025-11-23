@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "dotenv": "^17.2.3",
-    "node-telegram-bot-api": "^0.66.0",
-    "plotly.js-dist-min": "^3.3.0"
+    "fs": "^0.0.1-security",
+    "node-telegram-bot-api": "^0.66.0"
   }
 }
