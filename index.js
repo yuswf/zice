@@ -1,5 +1,6 @@
 require('dotenv').config();
 const Client = require('node-telegram-bot-api');
+const {spawn} = require('child_process');
 
 const token = process.env.TOKEN;
 const client = new Client(token, {polling: true});
@@ -14,11 +15,19 @@ const result = (msg) => {
         parse_mode: 'Markdown',
     });
 }
+const chart_gen = () => {
+    const arr = averages.map(i => Number(i));
+
+    const py = spawn('py', ['script.py', arr, arr.map((_, i) => i + 1)]);
+    py.stdout.on("data", data => console.log(data.toString()));
+    py.stderr.on("data", err => console.error(err.toString()));
+}
 
 client.setMyCommands([
     {command: 'start', description: 'bot sends dice to chat.'},
-    {command: 'stop', description: 'bot stops and sends result.'},
     {command: 'result', description: 'bot sends instant results.'},
+    {command: 'graph', description: 'bot sends instant result as graph.'},
+    {command: 'stop', description: 'bot stops and sends result.'},
 ]);
 
 client.onText(/\/start/, (msg) => {
@@ -28,16 +37,21 @@ client.onText(/\/start/, (msg) => {
                 dice_values.push(result.dice.value);
                 averages.push(average_calc(dice_values).toFixed(4));
             });
-    }, 3000);
+    }, 1000);
 });
 
 client.onText(/\/result/, (msg) => {
     result(msg);
 });
 
+client.onText(/\/graph/, (msg) => {
+    chart_gen();
+});
+
 client.onText(/\/stop/, (msg) => {
     clearInterval(interval);
 
     result(msg);
+    chart_gen();
     client.sendMessage(msg.chat.id, 'Stopped!');
 });
